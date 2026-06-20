@@ -500,6 +500,46 @@
       to   { opacity:1; transform:translateY(0); }
     }
 
+    /* ─── INSTALL TABS ─── */
+    .install-tabs {
+      width: 100%;
+      max-width: 520px;
+      animation: fadeUp .6s ease .35s both;
+      margin-bottom: 2rem;
+    }
+    .tab-btns {
+      display: flex;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: .45rem .5rem;
+      font-size: .72rem;
+      font-weight: 600;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: color .15s, background .15s;
+    }
+    .tab-btn:not(:last-child) { border-right: 1px solid var(--border); }
+    .tab-btn.active { background: rgba(255,255,255,.07); color: var(--text); }
+    .tab-panel { display: none; flex-direction: column; gap: .6rem; }
+    .tab-panel.active { display: flex; }
+    .install-note {
+      font-size: .7rem;
+      color: var(--muted);
+      text-align: left;
+      padding-left: 2px;
+      line-height: 1.5;
+    }
+    .install-note a { color: var(--plan); text-underline-offset: 2px; }
+
     /* ─── RESPONSIVE ─── */
     @media (max-width:580px) {
       .stage { grid-template-columns:1fr; }
@@ -527,36 +567,75 @@
       with a human gate at every step.
     </p>
 
-    <div class="install-wrap">
-      <span class="install-step">Step 1 — add to marketplace</span>
-      <div class="cmd-row">
-        <div class="cmd-text">
-          <span class="pr">/</span><span class="kw">plugin marketplace add </span><span class="ag">AnissL93/Polis</span>
-        </div>
-        <button class="copy-btn" data-copy="/plugin marketplace add AnissL93/Polis">Copy</button>
+    <div class="install-tabs">
+      <div class="tab-btns">
+        <button class="tab-btn active" data-tab="marketplace">Marketplace</button>
+        <button class="tab-btn" data-tab="clone">Cloned repo</button>
+        <button class="tab-btn" data-tab="tarball">Tarball</button>
       </div>
 
-      <span class="install-step">Step 2 — install</span>
-      <div class="cmd-row">
-        <div class="cmd-text">
-          <span class="pr">/</span><span class="kw">plugin install </span><span class="ag">polis@polis</span>
+      <!-- Marketplace -->
+      <div class="tab-panel active" id="tab-marketplace">
+        <span class="install-step">Step 1 — add to marketplace</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin marketplace add </span><span class="ag">AnissL93/Polis</span></div>
+          <button class="copy-btn" data-copy="/plugin marketplace add AnissL93/Polis">Copy</button>
         </div>
-        <button class="copy-btn" data-copy="/plugin install polis@polis">Copy</button>
+        <span class="install-step">Step 2 — install</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin install </span><span class="ag">polis@polis</span></div>
+          <button class="copy-btn" data-copy="/plugin install polis@polis">Copy</button>
+        </div>
       </div>
 
-      <span class="install-step">Then, from any directory</span>
-      <div class="cmd-row">
-        <div class="cmd-text">
-          <span class="pr">/</span><span class="kw">polis</span><span class="ag">:set-up</span>
-          &nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># create a project</span>
+      <!-- Cloned repo -->
+      <div class="tab-panel" id="tab-clone">
+        <span class="install-step">Step 1 — clone</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="kw">git clone </span><span class="ag">https://github.com/AnissL93/Polis.git</span></div>
+          <button class="copy-btn" data-copy="git clone https://github.com/AnissL93/Polis.git">Copy</button>
         </div>
+        <span class="install-step">Step 2 — point marketplace at the local directory</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin marketplace add </span><span class="ag">./Polis</span></div>
+          <button class="copy-btn" data-copy="/plugin marketplace add ./Polis">Copy</button>
+        </div>
+        <span class="install-step">Step 3 — install</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin install </span><span class="ag">polis@polis</span></div>
+          <button class="copy-btn" data-copy="/plugin install polis@polis">Copy</button>
+        </div>
+        <span class="install-note">Useful when you want to hack on Polis itself — edits take effect immediately without reinstalling.</span>
+      </div>
+
+      <!-- Tarball -->
+      <div class="tab-panel" id="tab-tarball">
+        <span class="install-step">Step 1 — download the latest release</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="kw">curl -L </span><span class="ag">https://github.com/AnissL93/Polis/releases/latest/download/polis.tar.gz</span><span class="kw"> -o polis.tar.gz</span></div>
+          <button class="copy-btn" data-copy="curl -L https://github.com/AnissL93/Polis/releases/latest/download/polis.tar.gz -o polis.tar.gz">Copy</button>
+        </div>
+        <span class="install-step">Step 2 — add the archive to marketplace</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin marketplace add </span><span class="ag">./polis.tar.gz</span></div>
+          <button class="copy-btn" data-copy="/plugin marketplace add ./polis.tar.gz">Copy</button>
+        </div>
+        <span class="install-step">Step 3 — install</span>
+        <div class="cmd-row">
+          <div class="cmd-text"><span class="pr">/</span><span class="kw">plugin install </span><span class="ag">polis@polis</span></div>
+          <button class="copy-btn" data-copy="/plugin install polis@polis">Copy</button>
+        </div>
+        <span class="install-note">Good for air-gapped environments or pinning to a specific release.</span>
+      </div>
+
+      <!-- common after-install -->
+      <span class="install-step" style="margin-top:.4rem">Then, from any directory</span>
+      <div class="cmd-row">
+        <div class="cmd-text"><span class="pr">/</span><span class="kw">polis</span><span class="ag">:set-up</span>&nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># create a project</span></div>
         <button class="copy-btn" data-copy="/polis:set-up">Copy</button>
       </div>
       <div class="cmd-row">
-        <div class="cmd-text">
-          <span class="pr">/</span><span class="kw">polis</span><span class="ag">:drive</span>
-          &nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># run the pipeline</span>
-        </div>
+        <div class="cmd-text"><span class="pr">/</span><span class="kw">polis</span><span class="ag">:drive</span>&nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># run the pipeline</span></div>
         <button class="copy-btn" data-copy="/polis:drive">Copy</button>
       </div>
     </div>
@@ -737,7 +816,7 @@
 <!-- ══════════════════ COMMANDS ══════════════════ -->
 <div class="sec">
   <div class="sec-label">Commands</div>
-  <h2 class="sec-title">Three skills, one workflow</h2>
+  <h2 class="sec-title">Four skills, one workflow</h2>
   <p class="sec-desc">Install the plugin once, use these commands from any directory in Claude Code.</p>
 
   <div class="cmd-grid">
@@ -769,12 +848,22 @@
     <div class="c-card anim" style="--d:.2s">
       <span class="c-icon">📝</span>
       <span class="c-name">/polis:docs</span>
-      <span class="c-desc">Sync all four documentation surfaces with code changes since the last git tag.</span>
+      <span class="c-desc">Sync in-repo documentation with code changes since the last git tag. Run after any meaningful change or when cutting a release.</span>
       <div class="c-steps">
         <div class="c-step"><span class="c-num">1</span>README — add, update, or remove changed sections</div>
         <div class="c-step"><span class="c-num">2</span>CHANGELOG — draft a new entry from the commit log</div>
         <div class="c-step"><span class="c-num">3</span>Inline docs — flag stale or missing docstrings</div>
-        <div class="c-step"><span class="c-num">4</span>Doc site — sync content, update nav, offer deploy</div>
+      </div>
+    </div>
+
+    <div class="c-card anim" style="--d:.3s">
+      <span class="c-icon">🌐</span>
+      <span class="c-name">/polis:page</span>
+      <span class="c-desc">Publish official documentation to a dedicated public GitHub repo and deploy it to GitHub Pages — keeping the main project private.</span>
+      <div class="c-steps">
+        <div class="c-step"><span class="c-num">1</span>Visualization — update the pipeline diagram page</div>
+        <div class="c-step"><span class="c-num">2</span>Docs sync — copy README, CHANGELOG, agent personas</div>
+        <div class="c-step"><span class="c-num">3</span>Pages — commit, push, and trigger the deploy workflow</div>
       </div>
     </div>
 
@@ -841,6 +930,17 @@
   document.querySelectorAll('.c-card').forEach(el => {
     const d = getComputedStyle(el).getPropertyValue('--d').trim();
     if (d) el.style.transitionDelay = d;
+  });
+
+  // ── Install tabs ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = btn.dataset.tab;
+      btn.closest('.install-tabs').querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.closest('.install-tabs').querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
+    });
   });
 
   const io = new IntersectionObserver(entries => {
