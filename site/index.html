@@ -806,7 +806,8 @@
     <div class="pattern anim">
       <strong style="color:var(--text)">The pattern — always the same loop at every stage:</strong><br>
       <span style="font-family:monospace;font-size:.78rem">comment → label → regenerate → repeat → advance</span><br>
-      The terminal action is always a human <strong style="color:var(--gate)">merge</strong>.
+      The terminal action is always a human <strong style="color:var(--gate)">merge</strong> (default).
+      Set <code style="font-size:.72rem">pipeline: {mode: auto}</code> in <code style="font-size:.72rem">polis.yml</code> to skip label gates and auto-merge clean PRs.
       Only the repo owner can trigger the pipeline.
     </div>
 
@@ -817,7 +818,7 @@
 <!-- ══════════════════ COMMANDS ══════════════════ -->
 <div class="sec">
   <div class="sec-label">Skills</div>
-  <h2 class="sec-title">Four skills, one workflow</h2>
+  <h2 class="sec-title">Five skills, one workflow</h2>
   <p class="sec-desc">Install the plugin once, use these commands from any directory in Claude Code.</p>
 
   <div class="cmd-grid">
@@ -868,6 +869,19 @@
         <div class="c-step"><span class="c-num">3</span>Pages deploy — commits, pushes, and triggers the GitHub Actions Pages workflow</div>
       </div>
       <div class="c-note">Docs live at <a href="https://github.com/AnissL93/polis-docs" style="color:var(--plan);text-underline-offset:2px">AnissL93/polis-docs</a> · <a href="https://AnissL93.github.io/polis-docs/" style="color:var(--plan);text-underline-offset:2px">AnissL93.github.io/polis-docs</a></div>
+    </div>
+
+    <div class="c-card anim" style="--d:.4s">
+      <span class="c-icon">🖥️</span>
+      <span class="c-name">/polis:server-setup</span>
+      <span class="c-desc">SSH into a remote server and configure it as a self-hosted GitHub Actions runner so every pipeline job runs on your own machine.</span>
+      <div class="c-steps">
+        <div class="c-step"><span class="c-num">1</span>Connectivity — tests SSH key-based access, guides through <code style="font-size:.7rem">ssh-copy-id</code> if needed</div>
+        <div class="c-step"><span class="c-num">2</span>Prerequisites — detects OS (Ubuntu/Debian, RHEL, macOS) and installs Node.js ≥ 18, git, and curl if missing</div>
+        <div class="c-step"><span class="c-num">3</span>Runner — downloads and registers the runner; token fetched via <code style="font-size:.7rem">gh api</code> and never printed; installs as systemd/launchd service</div>
+        <div class="c-step"><span class="c-num">4</span>Wire-up — sets <code style="font-size:.7rem">RUNNER_LABEL</code> repo variable; next pipeline job routes to your server</div>
+      </div>
+      <div class="c-note">To revert: <code style="font-size:.7rem">gh variable delete RUNNER_LABEL</code></div>
     </div>
 
   </div>
