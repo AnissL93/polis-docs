@@ -1,0 +1,859 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Polis — Issue-Driven Agent Pipeline</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d1117;
+      --surface:  #161b22;
+      --border:   #30363d;
+      --border2:  #3d444d;
+      --text:     #e6edf3;
+      --muted:    #8b949e;
+      --plan:     #58a6ff;
+      --plan-dim: rgba(88,166,255,.08);
+      --exec:     #3fb950;
+      --exec-dim: rgba(63,185,80,.08);
+      --gate:     #e3b341;
+      --gate-dim: rgba(227,179,65,.08);
+      --red:      #ff7b72;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1.5rem 6rem;
+      overflow: hidden;
+    }
+
+    /* animated mesh background */
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 55% at 20% 45%, rgba(88,166,255,.10) 0%, transparent 65%),
+        radial-gradient(ellipse 60% 50% at 80% 65%, rgba(63,185,80,.07)  0%, transparent 65%),
+        radial-gradient(ellipse 90% 70% at 50% 0%,  rgba(227,179,65,.05) 0%, transparent 55%);
+      animation: ambientPulse 8s ease-in-out infinite alternate;
+    }
+    @keyframes ambientPulse {
+      from { opacity: .7; }
+      to   { opacity: 1; }
+    }
+
+    /* dot grid */
+    .hero::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, rgba(255,255,255,.055) 1px, transparent 1px);
+      background-size: 38px 38px;
+      mask-image: radial-gradient(ellipse 80% 65% at 50% 45%, black 10%, transparent 80%);
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      max-width: 720px;
+    }
+
+    /* badge */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .4rem;
+      background: rgba(88,166,255,.1);
+      border: 1px solid rgba(88,166,255,.28);
+      border-radius: 999px;
+      padding: .22rem .8rem;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--plan);
+      margin-bottom: 1.75rem;
+      animation: fadeDown .5s ease both;
+    }
+    .badge-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--exec);
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .hero h1 {
+      font-size: clamp(3.5rem, 12vw, 6.5rem);
+      font-weight: 800;
+      letter-spacing: -.05em;
+      line-height: .95;
+      background: linear-gradient(140deg, #e6edf3 0%, var(--plan) 45%, var(--exec) 100%);
+      background-size: 200% 200%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeDown .6s ease .1s both, gradShift 6s ease infinite;
+      margin-bottom: 1.25rem;
+    }
+    @keyframes gradShift {
+      0%,100%{ background-position:0% 50% }
+      50%    { background-position:100% 50% }
+    }
+
+    .hero-sub {
+      font-size: clamp(1rem, 2.5vw, 1.2rem);
+      color: var(--muted);
+      line-height: 1.65;
+      max-width: 520px;
+      animation: fadeUp .6s ease .2s both;
+      margin-bottom: 2.75rem;
+    }
+
+    /* install box */
+    .install-wrap {
+      width: 100%;
+      max-width: 480px;
+      display: flex;
+      flex-direction: column;
+      gap: .6rem;
+      animation: fadeUp .6s ease .35s both;
+      margin-bottom: 2rem;
+    }
+    .install-step {
+      font-size: .65rem;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      color: var(--muted);
+      text-align: left;
+      padding-left: 2px;
+      margin-top: .2rem;
+    }
+    .cmd-row {
+      display: flex;
+      align-items: stretch;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+      transition: border-color .2s;
+    }
+    .cmd-row:hover { border-color: var(--border2); }
+    .cmd-text {
+      flex: 1;
+      padding: .6rem .9rem;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .82rem;
+      text-align: left;
+    }
+    .cmd-text .pr { color: var(--muted); }
+    .cmd-text .kw { color: var(--plan); }
+    .cmd-text .ag { color: var(--exec); }
+    .copy-btn {
+      padding: 0 .85rem;
+      background: none;
+      border: none;
+      border-left: 1px solid var(--border);
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .72rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      transition: color .15s, background .15s;
+      white-space: nowrap;
+    }
+    .copy-btn:hover  { background: rgba(255,255,255,.05); color: var(--text); }
+    .copy-btn.ok     { color: var(--exec); }
+
+    .hero-scroll {
+      position: absolute;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1;
+      color: var(--muted);
+      font-size: .75rem;
+      letter-spacing: .08em;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .3rem;
+      animation: fadeUp .6s ease .8s both;
+      text-decoration: none;
+    }
+    .hero-scroll svg { animation: arrowBob 1.8s ease infinite; }
+    @keyframes arrowBob {
+      0%,100%{ transform:translateY(0) }
+      50%    { transform:translateY(5px) }
+    }
+
+    /* ─── SECTION WRAPPER ─── */
+    .sec {
+      max-width: 940px;
+      margin: 0 auto;
+      padding: 5rem 1.5rem;
+    }
+    .sec-label {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--plan);
+      margin-bottom: .45rem;
+    }
+    .sec-title {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: -.025em;
+      margin-bottom: .7rem;
+    }
+    .sec-desc {
+      color: var(--muted);
+      font-size: .9rem;
+      line-height: 1.65;
+      max-width: 540px;
+      margin-bottom: 2.5rem;
+    }
+
+    /* ─── PIPELINE ─── */
+    .pipeline {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* flowing dashed connector */
+    .conn {
+      display: flex;
+      justify-content: center;
+      padding: .2rem 0;
+    }
+    .conn-line {
+      stroke-dasharray: 6 4;
+      animation: dashFlow 1.4s linear infinite;
+    }
+    @keyframes dashFlow { to { stroke-dashoffset: -20; } }
+
+    /* phase divider */
+    .phase-row {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      align-items: center;
+      gap: .75rem;
+      margin: 1.25rem 0;
+    }
+    .phase-rule { flex:1; height:1px; background:var(--border); }
+    .phase-pill {
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .2rem .65rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+    .phase-pill.plan { background:rgba(88,166,255,.12); color:var(--plan); }
+    .phase-pill.exec { background:rgba(63,185,80,.12);  color:var(--exec); }
+
+    /* stage grid: node | loop | node */
+    .stage {
+      width: 100%;
+      max-width: 680px;
+      display: grid;
+      grid-template-columns: 1fr 88px 1fr;
+      gap: .75rem;
+      align-items: center;
+      /* scroll-in */
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity .5s ease, transform .5s ease;
+    }
+    .stage.solo { grid-template-columns: 1fr; max-width: 380px; }
+    .stage.vis  { opacity:1; transform:translateY(0); }
+
+    /* node card */
+    .node {
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: var(--surface);
+      padding: .95rem 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: .38rem;
+      transition: transform .22s, border-color .22s, box-shadow .22s;
+      cursor: default;
+    }
+    .node:hover {
+      transform: translateY(-2px);
+      border-color: var(--border2);
+      box-shadow: 0 6px 22px rgba(0,0,0,.35);
+    }
+    .node.plan {
+      border-color: rgba(88,166,255,.28);
+      background: linear-gradient(140deg, rgba(88,166,255,.07) 0%, var(--surface) 80%);
+    }
+    .node.exec {
+      border-color: rgba(63,185,80,.28);
+      background: linear-gradient(140deg, rgba(63,185,80,.07) 0%, var(--surface) 80%);
+    }
+    .node.gate {
+      border-color: rgba(227,179,65,.3);
+      background: linear-gradient(140deg, rgba(227,179,65,.07) 0%, var(--surface) 80%);
+      text-align: center;
+      align-items: center;
+      animation: gatePulse 3s ease-in-out infinite;
+    }
+    .node.gate:hover { animation: none; }
+    @keyframes gatePulse {
+      0%,100%{ box-shadow: 0 0 0 0   rgba(227,179,65,.18) }
+      50%    { box-shadow: 0 0 0 10px rgba(227,179,65,0)   }
+    }
+    .node.start {
+      border-color: rgba(88,166,255,.2);
+      background: linear-gradient(140deg, rgba(88,166,255,.05) 0%, var(--surface) 80%);
+      text-align: center; align-items: center;
+    }
+    .node.finish {
+      border-color: rgba(255,123,114,.32);
+      background: linear-gradient(140deg, rgba(255,123,114,.08) 0%, var(--surface) 80%);
+      text-align: center; align-items: center;
+    }
+
+    .n-icon  { font-size: 1.4rem; line-height:1; }
+    .n-title { font-size: .88rem; font-weight: 600; color: var(--text); }
+    .n-desc  { font-size: .74rem; color: var(--muted); line-height: 1.5; }
+
+    /* chips */
+    .chips { display:flex; flex-wrap:wrap; gap:.28rem; margin-top:.15rem; }
+    .chip {
+      font-size: .62rem; font-weight:700;
+      font-family: "SFMono-Regular", Consolas, monospace;
+      padding: .12rem .45rem;
+      border-radius: 999px;
+      border: 1px solid;
+    }
+    .chip.plan { background:rgba(88,166,255,.1); color:var(--plan); border-color:rgba(88,166,255,.3); }
+    .chip.exec { background:rgba(63,185,80,.1);  color:var(--exec); border-color:rgba(63,185,80,.3);  }
+    .chip.loop { background:rgba(255,255,255,.04); color:var(--muted); border-color:var(--border); }
+
+    .art {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      font-size: .68rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: .1rem .38rem;
+      width: fit-content;
+      margin-top: .1rem;
+    }
+    .art::before { content:"→ "; opacity:.45; }
+
+    /* loop box */
+    .loop {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: .35rem;
+      padding: .55rem .45rem;
+      border: 1px dashed var(--border);
+      border-radius: 9px;
+      background: rgba(255,255,255,.015);
+    }
+    .loop-ico  { font-size: .85rem; opacity:.5; }
+    .loop-desc { font-size: .62rem; color:var(--muted); text-align:center; line-height:1.45; }
+
+    /* pattern callout */
+    .pattern {
+      width:100%; max-width:680px;
+      margin-top: 2rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      font-size: .83rem;
+      color: var(--muted);
+      line-height: 1.7;
+      opacity:0; transition: opacity .5s ease .25s;
+    }
+    .pattern.vis { opacity:1; }
+
+    /* legend */
+    .legend {
+      display: flex; flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+    .leg-item { display:flex; align-items:center; gap:.4rem; font-size:.78rem; color:var(--muted); }
+    .sw { width:9px; height:9px; border-radius:3px; }
+    .sw.plan { background:var(--plan); }
+    .sw.exec { background:var(--exec); }
+    .sw.gate { background:var(--gate); }
+    .sw.loop { background:transparent; border:1.5px dashed var(--muted); }
+
+    /* ─── COMMAND CARDS ─── */
+    .cmd-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px,1fr));
+      gap: 1rem;
+    }
+    .c-card {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 1.3rem;
+      display: flex;
+      flex-direction: column;
+      gap: .5rem;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity .5s ease, transform .5s ease, border-color .2s, box-shadow .2s;
+    }
+    .c-card.vis {
+      opacity:1; transform:translateY(0);
+    }
+    .c-card:hover {
+      border-color: var(--border2);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 28px rgba(0,0,0,.3);
+    }
+    .c-icon { font-size:1.5rem; }
+    .c-name {
+      font-family: "SFMono-Regular", Consolas, monospace;
+      font-size: .88rem; font-weight:600; color:var(--plan);
+    }
+    .c-desc { font-size:.8rem; color:var(--muted); line-height:1.55; }
+    .c-steps { margin-top:.3rem; display:flex; flex-direction:column; gap:.28rem; }
+    .c-step  { font-size:.74rem; color:var(--muted); display:flex; gap:.5rem; align-items:baseline; }
+    .c-num   { color:var(--plan); font-weight:700; min-width:.9rem; }
+
+    /* ─── LABEL TABLE ─── */
+    .tbl-wrap {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    table { width:100%; border-collapse:collapse; font-size:.82rem; }
+    th {
+      padding: .65rem 1rem;
+      text-align:left;
+      background: var(--surface);
+      color: var(--muted);
+      font-size: .67rem;
+      font-weight:700;
+      letter-spacing:.09em;
+      text-transform:uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: .62rem 1rem;
+      border-bottom: 1px solid rgba(48,54,61,.55);
+      vertical-align:top;
+    }
+    tr:last-child td { border-bottom:none; }
+    tr:hover td { background:rgba(255,255,255,.025); }
+    td:first-child { font-family:monospace; font-size:.78rem; white-space:nowrap; }
+    .pr td:first-child { color:var(--plan); }
+    .ex td:first-child { color:var(--exec); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align:center;
+      padding: 2.5rem 1.5rem;
+      color: var(--muted);
+      font-size:.8rem;
+    }
+    footer a { color:var(--muted); text-underline-offset:3px; }
+    footer a:hover { color:var(--text); }
+    footer code { font-size:.75rem; }
+
+    /* ─── KEYFRAMES ─── */
+    @keyframes fadeDown {
+      from { opacity:0; transform:translateY(-14px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(18px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width:580px) {
+      .stage { grid-template-columns:1fr; }
+      .loop  { display:none; }
+      .stage > .node.gate { order:-1; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<div class="hero" id="top">
+  <div class="hero-inner">
+
+    <div class="badge">
+      <span class="badge-dot"></span>
+      Claude Code Plugin &nbsp;·&nbsp; v0.11.0
+    </div>
+
+    <h1>Polis</h1>
+
+    <p class="hero-sub">
+      Issue-driven, human-in-the-loop agent pipeline.<br>
+      Turn any idea into shipped software — in any language —<br>
+      with a human gate at every step.
+    </p>
+
+    <div class="install-wrap">
+      <span class="install-step">Step 1 — add to marketplace</span>
+      <div class="cmd-row">
+        <div class="cmd-text">
+          <span class="pr">/</span><span class="kw">plugin marketplace add </span><span class="ag">AnissL93/Polis</span>
+        </div>
+        <button class="copy-btn" data-copy="/plugin marketplace add AnissL93/Polis">Copy</button>
+      </div>
+
+      <span class="install-step">Step 2 — install</span>
+      <div class="cmd-row">
+        <div class="cmd-text">
+          <span class="pr">/</span><span class="kw">plugin install </span><span class="ag">polis@polis</span>
+        </div>
+        <button class="copy-btn" data-copy="/plugin install polis@polis">Copy</button>
+      </div>
+
+      <span class="install-step">Then, from any directory</span>
+      <div class="cmd-row">
+        <div class="cmd-text">
+          <span class="pr">/</span><span class="kw">polis</span><span class="ag">:set-up</span>
+          &nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># create a project</span>
+        </div>
+        <button class="copy-btn" data-copy="/polis:set-up">Copy</button>
+      </div>
+      <div class="cmd-row">
+        <div class="cmd-text">
+          <span class="pr">/</span><span class="kw">polis</span><span class="ag">:drive</span>
+          &nbsp;&nbsp;<span style="color:var(--muted);font-size:.75rem"># run the pipeline</span>
+        </div>
+        <button class="copy-btn" data-copy="/polis:drive">Copy</button>
+      </div>
+    </div>
+
+  </div>
+
+  <a href="#pipeline" class="hero-scroll">
+    <span>How it works</span>
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="var(--muted)">
+      <path d="M8 10.94L2.53 5.47a.75.75 0 00-1.06 1.06l6 6a.75.75 0 001.06 0l6-6a.75.75 0 10-1.06-1.06L8 10.94z"/>
+    </svg>
+  </a>
+</div>
+
+
+<!-- ══════════════════ PIPELINE ══════════════════ -->
+<div class="sec" id="pipeline">
+  <div class="sec-label">How it works</div>
+  <h2 class="sec-title">The pipeline, end to end</h2>
+  <p class="sec-desc">
+    Every idea follows the same path. Add a label, the agent acts.
+    Comment, relabel, regenerate. Only humans merge.
+  </p>
+
+  <div class="legend">
+    <div class="leg-item"><span class="sw plan"></span>Planning stage</div>
+    <div class="leg-item"><span class="sw exec"></span>Execution stage</div>
+    <div class="leg-item"><span class="sw gate"></span>Human gate</div>
+    <div class="leg-item"><span class="sw loop"></span>Iterative loop</div>
+  </div>
+
+  <div class="pipeline">
+
+    <!-- Idea -->
+    <div class="stage solo anim">
+      <div class="node start">
+        <span class="n-icon">💡</span>
+        <span class="n-title">Idea</span>
+        <span class="n-desc">Open a GitHub Issue describing what you want to build.</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <svg width="2" height="38" overflow="visible">
+        <line class="conn-line" x1="1" y1="0" x2="1" y2="38" stroke="#8b949e" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Planning -->
+    <div class="phase-row anim">
+      <span class="phase-rule"></span>
+      <span class="phase-pill plan">Planning layer</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- Arch -->
+    <div class="stage anim">
+      <div class="node plan">
+        <span class="n-title">Architecture doc</span>
+        <span class="n-desc">Agent writes a high-level design with a phased work breakdown in a draft PR.</span>
+        <div class="chips"><span class="chip plan">agent:arch</span></div>
+        <span class="art">Draft PR</span>
+      </div>
+      <div class="loop">
+        <span class="loop-ico">↺</span>
+        <span class="chip loop">agent:rearch</span>
+        <span class="loop-desc">Revise from<br>PR comments</span>
+      </div>
+      <div class="node gate">
+        <span class="n-icon">👤</span>
+        <span class="n-title">Human review</span>
+        <span class="n-desc">Comment → relabel → regenerate.<br>Approve when satisfied.</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <svg width="2" height="38" overflow="visible">
+        <line class="conn-line" x1="1" y1="0" x2="1" y2="38" stroke="#8b949e" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Decompose -->
+    <div class="stage solo anim">
+      <div class="node plan">
+        <span class="n-title">Milestones &amp; issues</span>
+        <span class="n-desc">Agent creates one milestone per phase and one issue per breakdown line from the architecture doc.</span>
+        <div class="chips"><span class="chip plan">agent:decompose</span></div>
+        <span class="art">GitHub Issues</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <svg width="2" height="38" overflow="visible">
+        <line class="conn-line" x1="1" y1="0" x2="1" y2="38" stroke="#8b949e" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Execution -->
+    <div class="phase-row anim">
+      <span class="phase-rule"></span>
+      <span class="phase-pill exec">Execution layer — per issue</span>
+      <span class="phase-rule"></span>
+    </div>
+
+    <!-- Spec -->
+    <div class="stage anim">
+      <div class="node exec">
+        <span class="n-title">Spec</span>
+        <span class="n-desc">Agent writes a detailed spec (including a Test plan) in a draft PR.</span>
+        <div class="chips"><span class="chip exec">agent:spec</span></div>
+        <span class="art">Draft PR</span>
+      </div>
+      <div class="loop">
+        <span class="loop-ico">↺</span>
+        <span class="chip loop">agent:respec</span>
+        <span class="loop-desc">Revise from<br>PR comments</span>
+      </div>
+      <div class="node gate">
+        <span class="n-icon">👤</span>
+        <span class="n-title">Human review</span>
+        <span class="n-desc">Comment → relabel → regenerate.<br>Approve when satisfied.</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <svg width="2" height="38" overflow="visible">
+        <line class="conn-line" x1="1" y1="0" x2="1" y2="38" stroke="#8b949e" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Code -->
+    <div class="stage anim">
+      <div class="node exec">
+        <span class="n-title">Code &amp; tests</span>
+        <span class="n-desc">Agent implements the feature, runs an AI review loop, and marks the PR ready for human merge.</span>
+        <div class="chips"><span class="chip exec">agent:code</span></div>
+        <span class="art">PR ready for review</span>
+      </div>
+      <div class="loop">
+        <span class="loop-ico">↺</span>
+        <span class="chip loop">agent:fix</span>
+        <span class="loop-desc">Revise from comments or fix failing tests</span>
+      </div>
+      <div class="node gate">
+        <span class="n-icon">👤</span>
+        <span class="n-title">Human review &amp; merge</span>
+        <span class="n-desc">Review the PR. Apply <code style="font-size:.68rem">agent:fix</code> to iterate. Merge when satisfied.</span>
+      </div>
+    </div>
+
+    <div class="conn">
+      <svg width="2" height="38" overflow="visible">
+        <line class="conn-line" x1="1" y1="0" x2="1" y2="38" stroke="#8b949e" stroke-width="1.5"/>
+      </svg>
+    </div>
+
+    <!-- Shipped -->
+    <div class="stage solo anim">
+      <div class="node finish">
+        <span class="n-icon">🚀</span>
+        <span class="n-title">Shipped</span>
+        <span class="n-desc">Merged to main. Deploy runs. Repeat for the next issue.</span>
+      </div>
+    </div>
+
+    <!-- Pattern callout -->
+    <div class="pattern anim">
+      <strong style="color:var(--text)">The pattern — always the same loop at every stage:</strong><br>
+      <span style="font-family:monospace;font-size:.78rem">comment → label → regenerate → repeat → advance</span><br>
+      The terminal action is always a human <strong style="color:var(--gate)">merge</strong>.
+      Only the repo owner can trigger the pipeline.
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════ COMMANDS ══════════════════ -->
+<div class="sec">
+  <div class="sec-label">Commands</div>
+  <h2 class="sec-title">Three skills, one workflow</h2>
+  <p class="sec-desc">Install the plugin once, use these commands from any directory in Claude Code.</p>
+
+  <div class="cmd-grid">
+
+    <div class="c-card anim">
+      <span class="c-icon">🏗️</span>
+      <span class="c-name">/polis:set-up</span>
+      <span class="c-desc">Scaffold a brand-new Polis-powered repo from anywhere. Walks you through every step interactively.</span>
+      <div class="c-steps">
+        <div class="c-step"><span class="c-num">1</span>Repo — name, directory, owner, visibility</div>
+        <div class="c-step"><span class="c-num">2</span>Secrets — PAT, Claude OAuth, optional backend keys</div>
+        <div class="c-step"><span class="c-num">3</span>Config — review or customise <code style="font-size:.7rem">polis.yml</code></div>
+        <div class="c-step"><span class="c-num">4</span>Labels — pipeline trigger labels created automatically</div>
+      </div>
+    </div>
+
+    <div class="c-card anim" style="--d:.1s">
+      <span class="c-icon">🎮</span>
+      <span class="c-name">/polis:drive</span>
+      <span class="c-desc">A terminal cockpit for the whole pipeline — no GitHub web UI needed.</span>
+      <div class="c-steps">
+        <div class="c-step"><span class="c-num">→</span>State panel — issues &amp; PRs with current stage</div>
+        <div class="c-step"><span class="c-num">→</span>Create issues and apply <code style="font-size:.7rem">agent:*</code> labels</div>
+        <div class="c-step"><span class="c-num">→</span>Watch Actions runs, read AI review feedback</div>
+        <div class="c-step"><span class="c-num">→</span>Merge finished PRs — confirms before every action</div>
+      </div>
+    </div>
+
+    <div class="c-card anim" style="--d:.2s">
+      <span class="c-icon">📝</span>
+      <span class="c-name">/polis:docs</span>
+      <span class="c-desc">Sync all four documentation surfaces with code changes since the last git tag.</span>
+      <div class="c-steps">
+        <div class="c-step"><span class="c-num">1</span>README — add, update, or remove changed sections</div>
+        <div class="c-step"><span class="c-num">2</span>CHANGELOG — draft a new entry from the commit log</div>
+        <div class="c-step"><span class="c-num">3</span>Inline docs — flag stale or missing docstrings</div>
+        <div class="c-step"><span class="c-num">4</span>Doc site — sync content, update nav, offer deploy</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ══════════════════ LABEL REFERENCE ══════════════════ -->
+<div class="sec">
+  <div class="sec-label">Reference</div>
+  <h2 class="sec-title">Label reference</h2>
+  <p class="sec-desc">Add these labels to an issue or PR to trigger the agent pipeline.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr><th>Label</th><th>What the agent does</th><th>Output</th></tr>
+      </thead>
+      <tbody>
+        <tr class="pr"><td>agent:arch</td><td>Writes a high-level architecture doc with a phased work breakdown</td><td>Draft PR</td></tr>
+        <tr class="pr"><td>agent:rearch</td><td>Rewrites the architecture doc from your PR comments (repeat as needed)</td><td>Updated draft PR</td></tr>
+        <tr class="pr"><td>agent:decompose</td><td>Creates one milestone per phase and one issue per breakdown line</td><td>GitHub Issues</td></tr>
+        <tr class="ex"><td>agent:spec</td><td>Writes a detailed spec including a Test plan</td><td>Draft PR</td></tr>
+        <tr class="ex"><td>agent:respec</td><td>Rewrites the spec from your PR comments (repeat as needed)</td><td>Updated draft PR</td></tr>
+        <tr class="ex"><td>agent:code</td><td>Implements code + tests, runs an AI review loop, marks the PR ready</td><td>PR ready</td></tr>
+        <tr class="ex"><td>agent:fix</td><td>Revises from PR comments — or fixes failing tests if no comment — then re-runs tests</td><td>Updated PR</td></tr>
+        <tr class="ex"><td>agent:code_review</td><td>AI review of the code PR with the default review recipe</td><td>Review comments</td></tr>
+        <tr class="ex"><td>agent:spec_review:&lt;backend&gt;</td><td>Reviews the spec using a named backend (e.g. <code>codex</code>)</td><td>Review comments</td></tr>
+        <tr class="pr"><td>agent:arch_review:&lt;profile&gt;</td><td>Reviews the arch doc with a named profile (e.g. <code>thorough</code>)</td><td>Review comments</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <p>
+    <a href="https://github.com/AnissL93/Polis">AnissL93/Polis</a> on GitHub
+    &nbsp;·&nbsp;
+    <code>/plugin marketplace add AnissL93/Polis</code>
+  </p>
+</footer>
+
+
+<script>
+  // ── Copy buttons ──
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const text = btn.dataset.copy;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '✓ Copied';
+        btn.classList.add('ok');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('ok');
+        }, 2000);
+      });
+    });
+  });
+
+  // ── Scroll-in animations ──
+  // Cards with a CSS variable delay (--d) get it applied on the transition
+  document.querySelectorAll('.c-card').forEach(el => {
+    const d = getComputedStyle(el).getPropertyValue('--d').trim();
+    if (d) el.style.transitionDelay = d;
+  });
+
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('vis');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.anim').forEach(el => io.observe(el));
+</script>
+
+</body>
+</html>
