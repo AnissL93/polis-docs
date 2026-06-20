@@ -448,6 +448,7 @@
     .c-steps { margin-top:.3rem; display:flex; flex-direction:column; gap:.28rem; }
     .c-step  { font-size:.74rem; color:var(--muted); display:flex; gap:.5rem; align-items:baseline; }
     .c-num   { color:var(--plan); font-weight:700; min-width:.9rem; }
+    .c-note  { font-size:.72rem; color:var(--muted); margin-top:.3rem; line-height:1.5; padding-top:.5rem; border-top:1px solid var(--border); }
 
     /* ─── LABEL TABLE ─── */
     .tbl-wrap {
@@ -815,7 +816,7 @@
 
 <!-- ══════════════════ COMMANDS ══════════════════ -->
 <div class="sec">
-  <div class="sec-label">Commands</div>
+  <div class="sec-label">Skills</div>
   <h2 class="sec-title">Four skills, one workflow</h2>
   <p class="sec-desc">Install the plugin once, use these commands from any directory in Claude Code.</p>
 
@@ -824,47 +825,49 @@
     <div class="c-card anim">
       <span class="c-icon">🏗️</span>
       <span class="c-name">/polis:set-up</span>
-      <span class="c-desc">Scaffold a brand-new Polis-powered repo from anywhere. Walks you through every step interactively.</span>
+      <span class="c-desc">Stand up a brand-new Polis-powered repo from anywhere. You never edit files by hand — it asks as it goes.</span>
       <div class="c-steps">
-        <div class="c-step"><span class="c-num">1</span>Repo — name, directory, owner, visibility</div>
-        <div class="c-step"><span class="c-num">2</span>Secrets — PAT, Claude OAuth, optional backend keys</div>
-        <div class="c-step"><span class="c-num">3</span>Config — review or customise <code style="font-size:.7rem">polis.yml</code></div>
-        <div class="c-step"><span class="c-num">4</span>Labels — pipeline trigger labels created automatically</div>
+        <div class="c-step"><span class="c-num">1</span>Repo — project name, directory, owner, and visibility; clones the template and pushes to a new GitHub repo</div>
+        <div class="c-step"><span class="c-num">2</span>Secrets — create <code style="font-size:.7rem">PIPELINE_PAT</code> and each backend's auth; you run every secret command in your own session</div>
+        <div class="c-step"><span class="c-num">3</span>Config — shows the default <code style="font-size:.7rem">polis.yml</code> and asks whether to customise it</div>
+        <div class="c-step"><span class="c-num">4</span>Labels — creates the pipeline's trigger labels in the new repo</div>
       </div>
+      <div class="c-note">Collaborators get a bundled <code style="font-size:.7rem">/drive</code> skill — no plugin install needed.</div>
     </div>
 
     <div class="c-card anim" style="--d:.1s">
       <span class="c-icon">🎮</span>
       <span class="c-name">/polis:drive</span>
-      <span class="c-desc">A terminal cockpit for the whole pipeline — no GitHub web UI needed.</span>
+      <span class="c-desc">A cockpit for the whole pipeline — no GitHub web UI.</span>
       <div class="c-steps">
-        <div class="c-step"><span class="c-num">→</span>State panel — issues &amp; PRs with current stage</div>
-        <div class="c-step"><span class="c-num">→</span>Create issues and apply <code style="font-size:.7rem">agent:*</code> labels</div>
-        <div class="c-step"><span class="c-num">→</span>Watch Actions runs, read AI review feedback</div>
-        <div class="c-step"><span class="c-num">→</span>Merge finished PRs — confirms before every action</div>
+        <div class="c-step"><span class="c-num">→</span>State panel — issues &amp; PRs with current stage and the suggested next label</div>
+        <div class="c-step"><span class="c-num">→</span>Create issues, apply any <code style="font-size:.7rem">agent:*</code> trigger — plan / spec / code / fix, plus on-demand review with a chosen backend or profile</div>
+        <div class="c-step"><span class="c-num">→</span>Watch triggered Actions runs and read AI/human review feedback</div>
+        <div class="c-step"><span class="c-num">→</span>Merge finished PRs via <code style="font-size:.7rem">gh</code> — confirms before anything that spends a run or merges</div>
       </div>
     </div>
 
     <div class="c-card anim" style="--d:.2s">
       <span class="c-icon">📝</span>
       <span class="c-name">/polis:docs</span>
-      <span class="c-desc">Sync in-repo documentation with code changes since the last git tag. Run after any meaningful change or when cutting a release.</span>
+      <span class="c-desc">Keeps three in-repo documentation surfaces in sync with code changes since the last git tag. Run after any meaningful change or when cutting a release.</span>
       <div class="c-steps">
-        <div class="c-step"><span class="c-num">1</span>README — add, update, or remove changed sections</div>
-        <div class="c-step"><span class="c-num">2</span>CHANGELOG — draft a new entry from the commit log</div>
-        <div class="c-step"><span class="c-num">3</span>Inline docs — flag stale or missing docstrings</div>
+        <div class="c-step"><span class="c-num">1</span>README — adds, updates, or removes sections; shows a unified diff before writing</div>
+        <div class="c-step"><span class="c-num">2</span>CHANGELOG — drafts a new <code style="font-size:.7rem">[Unreleased]</code> section by categorising commits; asks before prepending</div>
+        <div class="c-step"><span class="c-num">3</span>Inline docs — flags public symbols with missing or stale docstrings, writes concise fixes on approval</div>
       </div>
     </div>
 
     <div class="c-card anim" style="--d:.3s">
       <span class="c-icon">🌐</span>
       <span class="c-name">/polis:page</span>
-      <span class="c-desc">Publish official documentation to a dedicated public GitHub repo and deploy it to GitHub Pages — keeping the main project private.</span>
+      <span class="c-desc">Syncs official documentation and the pipeline visualization to a dedicated public GitHub repo, deployed to GitHub Pages — keeping the main project private.</span>
       <div class="c-steps">
-        <div class="c-step"><span class="c-num">1</span>Visualization — update the pipeline diagram page</div>
-        <div class="c-step"><span class="c-num">2</span>Docs sync — copy README, CHANGELOG, agent personas</div>
-        <div class="c-step"><span class="c-num">3</span>Pages — commit, push, and trigger the deploy workflow</div>
+        <div class="c-step"><span class="c-num">1</span>Visualization — updates <code style="font-size:.7rem">site/index.html</code> to reflect any pipeline or label changes</div>
+        <div class="c-step"><span class="c-num">2</span>Docs sync — copies README, CHANGELOG, agent personas, and config examples to the docs repo</div>
+        <div class="c-step"><span class="c-num">3</span>Pages deploy — commits, pushes, and triggers the GitHub Actions Pages workflow</div>
       </div>
+      <div class="c-note">Docs live at <a href="https://github.com/AnissL93/polis-docs" style="color:var(--plan);text-underline-offset:2px">AnissL93/polis-docs</a> · <a href="https://AnissL93.github.io/polis-docs/" style="color:var(--plan);text-underline-offset:2px">AnissL93.github.io/polis-docs</a></div>
     </div>
 
   </div>
