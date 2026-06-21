@@ -7,6 +7,12 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Onboard an existing repo** — `/polis:set-up` now has two modes: scaffold a new project,
+  or adopt an existing repo by URL. `scripts/onboard-existing.sh` injects the pipeline
+  machinery non-destructively (keeps the repo's README, CI, and any existing
+  `build.sh`/`test.sh`; seeds missing build/test scripts from the detected stack) on a
+  `chore/onboard-polis` branch and opens a PR. The skill then analyzes the code and open
+  issues and recommends a starting label for each.
 - **`/polis:server-setup` skill** — SSH into a remote server and configure a self-hosted
   GitHub Actions runner end-to-end: tests connectivity, installs prerequisites (Node.js,
   git, curl) per OS (Ubuntu/Debian, RHEL, macOS), downloads and registers the runner with

@@ -20,10 +20,12 @@ That adds five skills: `/polis:set-up`, `/polis:drive`, `/polis:docs`, `/polis:p
 
 ## Skills
 
-### `/polis:set-up` — create a new project
+### `/polis:set-up` — create a new project **or** onboard an existing one
 
-Run it from anywhere to stand up a brand-new Polis-powered repo. It walks you through, asking
-as it goes — you never edit files by hand:
+Run it from anywhere. It first asks which mode you want, then walks you through — you never
+edit files by hand:
+
+**New project.** Stand up a brand-new Polis-powered repo:
 
 1. **Repo** — asks for a project name, target directory, owner, and visibility; clones the
    template and pushes a clean copy to a **new** GitHub repo (Actions on by default).
@@ -35,6 +37,19 @@ as it goes — you never edit files by hand:
 
 The new repo contains the pipeline machinery plus a bundled `/drive` skill, so collaborators
 can drive it without installing the plugin. No manual clone needed.
+
+**Existing repo.** Give it a repo URL (one you have push access to) and Polis adopts it:
+
+1. **Onboard via PR** — clones the repo, injects the pipeline machinery on a
+   `chore/onboard-polis` branch, and opens a PR. It's **non-destructive**: your README, CI,
+   and any existing `build.sh`/`test.sh` are kept; missing build/test scripts are seeded from
+   the detected stack (e.g. `pip install` + `pytest`, `npm ci` + `npm test`, `go build` +
+   `go test`).
+2. **Secrets, config, labels** — same as a new project, on the repo you onboarded.
+3. **Analyze & suggest** — detects the tech stack, lists the open issues, and recommends a
+   starting label for each (`agent:arch` for large/design-heavy work, `agent:spec` for
+   well-scoped changes). You apply the labels to start the pipeline — the human gate stays
+   yours. The pipeline goes live once the onboarding PR merges.
 
 ### `/polis:drive` — run the pipeline from the terminal
 

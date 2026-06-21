@@ -826,12 +826,11 @@
     <div class="c-card anim">
       <span class="c-icon">🏗️</span>
       <span class="c-name">/polis:set-up</span>
-      <span class="c-desc">Stand up a brand-new Polis-powered repo from anywhere. You never edit files by hand — it asks as it goes.</span>
+      <span class="c-desc">Create a new project — or onboard an existing repo by URL. Asks which mode, then walks you through; you never edit files by hand.</span>
       <div class="c-steps">
-        <div class="c-step"><span class="c-num">1</span>Repo — project name, directory, owner, and visibility; clones the template and pushes to a new GitHub repo</div>
-        <div class="c-step"><span class="c-num">2</span>Secrets — create <code style="font-size:.7rem">PIPELINE_PAT</code> and each backend's auth; you run every secret command in your own session</div>
-        <div class="c-step"><span class="c-num">3</span>Config — shows the default <code style="font-size:.7rem">polis.yml</code> and asks whether to customise it</div>
-        <div class="c-step"><span class="c-num">4</span>Labels — creates the pipeline's trigger labels in the new repo</div>
+        <div class="c-step"><span class="c-num">A</span>New project — clones the template and pushes a clean copy to a new GitHub repo</div>
+        <div class="c-step"><span class="c-num">B</span>Existing repo — injects the pipeline into your repo via a non-destructive PR (keeps your README, CI &amp; build/test), then analyzes the code &amp; open issues and suggests a starting label for each</div>
+        <div class="c-step"><span class="c-num">→</span>Both — guides <code style="font-size:.7rem">PIPELINE_PAT</code> + backend auth (you run secret commands yourself), shows <code style="font-size:.7rem">polis.yml</code>, and creates the trigger labels</div>
       </div>
       <div class="c-note">Collaborators get a bundled <code style="font-size:.7rem">/drive</code> skill — no plugin install needed.</div>
     </div>
