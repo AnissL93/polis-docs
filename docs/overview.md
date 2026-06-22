@@ -13,7 +13,7 @@ Polis ships as a Claude Code plugin. Install it once, then use it from any direc
 /plugin install polis@polis
 ```
 
-That adds five skills: `/polis:set-up`, `/polis:drive`, `/polis:docs`, `/polis:page`, and `/polis:server-setup`.
+That adds six skills: `/polis:set-up`, `/polis:drive`, `/polis:maintain`, `/polis:docs`, `/polis:page`, and `/polis:server-setup`.
 
 > Prefer to set things up by hand on GitHub instead of using the plugin? See
 > [Manual setup](#manual-setup-without-the-plugin) at the end.
@@ -60,6 +60,26 @@ A cockpit for the whole pipeline — no GitHub web UI:
   plus on-demand review with a chosen backend or profile;
 - **watch** the triggered Actions run, **read** the AI/human review feedback, and **merge** a
   finished PR — all via `gh`, confirming before anything that spends a run or merges.
+
+### `/polis:maintain` — keep a shipped project healthy
+
+Where `/polis:drive` advances one issue, `/polis:maintain` runs a periodic **sweep** that
+keeps a maintained project moving — it scans, then files well-formed, labeled issues that flow
+through the normal pipeline (`agent:spec` → `agent:code`, or `agent:arch` for bigger work). Pick
+any combination of four sweeps:
+
+| Sweep | What it does |
+|-------|--------------|
+| **Triage** | Classifies & dedupes open issues, flags stale ones, recommends a pipeline entry label |
+| **Bug hunt** | Scans the code with parallel reviewer subagents, verifies findings, files real `bug` issues |
+| **Discover** | Mines open + recently-closed issues and their comments (feedback) for future features |
+| **Health check** | Surfaces failing CI on the default branch, stale PRs, and abandoned branches |
+
+It only **analyzes and files** — every fix/feature still runs through the pipeline once you
+apply a trigger label (it confirms before creating issues or spending a run). The sweep uses a
+small triage vocabulary — `bug`, `enhancement`, `feedback`, `needs-triage`, `stale` — created by
+`bootstrap-labels.sh` alongside the pipeline labels. Run it weekly to fill the backlog, then use
+`/polis:drive` to work it.
 
 ### `/polis:docs` — sync in-repo documentation
 

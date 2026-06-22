@@ -7,6 +7,11 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`/polis:maintain` skill** — maintenance front-end that runs periodic sweeps (triage open
+  issues, hunt bugs with parallel reviewer subagents, discover features from issues/feedback,
+  health-check CI/PRs/branches) and turns findings into well-formed, labeled issues that flow
+  through the dev pipeline. Adds triage labels (`bug`, `enhancement`, `feedback`,
+  `needs-triage`, `stale`) to `bootstrap-labels.sh`.
 - **Onboard an existing repo** — `/polis:set-up` now has two modes: scaffold a new project,
   or adopt an existing repo by URL. `scripts/onboard-existing.sh` injects the pipeline
   machinery non-destructively (keeps the repo's README, CI, and any existing
